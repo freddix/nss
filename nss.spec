@@ -2,13 +2,13 @@
 
 Summary:	Network Security Services
 Name:		nss
-Version:	3.13.5
-Release:	1
+Version:	3.13.6
+Release:	2
 Epoch:		1
 License:	GPL
 Group:		Libraries
 Source0:	http://ftp.mozilla.org/pub/mozilla.org/security/nss/releases/NSS_%{foover}_RTM/src/%{name}-%{version}.tar.gz
-# Source0-md5:	b85607eecc6c6ea49185febb546e5b43
+# Source0-md5:	15ea0e3b63cd0d18b5b75619afc46c3e
 Source1:	%{name}-mozilla-nss.pc
 Source2:	%{name}-config.in
 Source3:	http://www.cacert.org/certs/root.der
@@ -16,6 +16,7 @@ Source3:	http://www.cacert.org/certs/root.der
 Patch0:		%{name}-makefile.patch
 URL:		http://www.mozilla.org/projects/security/pki/nss/
 BuildRequires:	nspr-devel >= 1:4.9
+BuildRequires:	nss-tools
 BuildRequires:	sqlite3-devel
 BuildRequires:	zlib-devel
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
@@ -137,11 +138,6 @@ sed -e "
 " %{SOURCE2} > $RPM_BUILD_ROOT%{_bindir}/nss-config
 chmod +x $RPM_BUILD_ROOT%{_bindir}/nss-config
 
-mv $RPM_BUILD_ROOT%{_libdir}/libfreebl3.so $RPM_BUILD_ROOT/%{_lib}
-ln -s /%{_lib}/libfreebl3.so $RPM_BUILD_ROOT%{_libdir}/libfreebl3.so
-mv $RPM_BUILD_ROOT%{_libdir}/libfreebl3.chk $RPM_BUILD_ROOT/%{_lib}
-ln -s /%{_lib}/libfreebl3.chk $RPM_BUILD_ROOT%{_libdir}/libfreebl3.chk
-
 [ -f "$RPM_BUILD_ROOT%{_includedir}/nss/nsslowhash.h" ] || exit 1
 
 %clean
@@ -153,6 +149,7 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libfreebl3.so
+%attr(755,root,root) %{_libdir}/libfreebl3.so
 %attr(755,root,root) %{_libdir}/libnss3.so
 %attr(755,root,root) %{_libdir}/libnssckbi.so
 %attr(755,root,root) %{_libdir}/libnssdbm3.so
@@ -161,12 +158,9 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/libsoftokn3.so
 %attr(755,root,root) %{_libdir}/libssl3.so
 %{_libdir}/libfreebl3.chk
+%{_libdir}/libfreebl3.chk
 %{_libdir}/libnssdbm3.chk
 %{_libdir}/libsoftokn3.chk
-
-%attr(755,root,root) /%{_lib}/libfreebl3.so
-/%{_lib}/libfreebl3.chk
-
 
 %files devel
 %defattr(644,root,root,755)
