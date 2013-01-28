@@ -2,13 +2,13 @@
 
 Summary:	Network Security Services
 Name:		nss
-Version:	3.13.6
-Release:	2
+Version:	3.14.1
+Release:	1
 Epoch:		1
 License:	GPL
 Group:		Libraries
 Source0:	http://ftp.mozilla.org/pub/mozilla.org/security/nss/releases/NSS_%{foover}_RTM/src/%{name}-%{version}.tar.gz
-# Source0-md5:	15ea0e3b63cd0d18b5b75619afc46c3e
+# Source0-md5:	f6f3a942d1eba3e26aa0382a5b5461d9
 Source1:	%{name}-mozilla-nss.pc
 Source2:	%{name}-config.in
 Source3:	http://www.cacert.org/certs/root.der
@@ -65,7 +65,6 @@ cd mozilla/security/nss
 
 # http://wiki.cacert.org/wiki/NSSLib
 addbuiltin -n "CAcert Inc." -t "CT,C,C" < %{SOURCE3} >> lib/ckfw/builtins/certdata.txt
-%{__make} -C lib/ckfw/builtins generate
 
 %ifarch %{x8664} 
 export USE_64=1
@@ -127,7 +126,7 @@ NSS_VMAJOR=$(awk '/#define.*NSS_VMAJOR/ {print $3}' mozilla/security/nss/lib/nss
 NSS_VMINOR=$(awk '/#define.*NSS_VMINOR/ {print $3}' mozilla/security/nss/lib/nss/nss.h)
 NSS_VPATCH=$(awk '/#define.*NSS_VPATCH/ {print $3}' mozilla/security/nss/lib/nss/nss.h)
 
-sed -e "
+%{__sed} -e "
 	s,@libdir@,%{_libdir},g
 	s,@prefix@,%{_prefix},g
 	s,@exec_prefix@,%{_prefix},g

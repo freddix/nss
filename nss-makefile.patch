@@ -1,8 +1,7 @@
-diff -aurN nss-3.12.6.orig/mozilla/security/coreconf/Linux.mk nss-3.12.6/mozilla/security/coreconf/Linux.mk
---- nss-3.12.6.orig/mozilla/security/coreconf/Linux.mk	2010-03-23 21:17:44.000000000 +0100
-+++ nss-3.12.6/mozilla/security/coreconf/Linux.mk	2010-03-23 21:18:19.000000000 +0100
-@@ -150,8 +150,8 @@
- DSO_LDOPTS		+= $(if $(findstring 2.11.90.0.8,$(shell ld -v)),,$(ZDEFS_FLAG))
+--- nss-3.11.1/mozilla/security/coreconf/Linux.mk.orig	2006-04-25 03:32:16.000000000 +0200
++++ nss-3.11.1/mozilla/security/coreconf/Linux.mk	2006-05-27 21:07:22.101515500 +0200
+@@ -169,8 +169,8 @@
+ DSO_LDFLAGS		=
  LDFLAGS			+= $(ARCHFLAG)
  
 -# INCLUDES += -I/usr/include -Y/usr/include/linux
@@ -10,10 +9,10 @@ diff -aurN nss-3.12.6.orig/mozilla/security/coreconf/Linux.mk nss-3.12.6/mozilla
 +INCLUDES += -I/usr/include/nspr
  
  #
- # Always set CPU_TAG on Linux, WINCE.
-diff -aurN nss-3.12.6.orig/mozilla/security/coreconf/ruleset.mk nss-3.12.6/mozilla/security/coreconf/ruleset.mk
---- nss-3.12.6.orig/mozilla/security/coreconf/ruleset.mk	2010-03-23 21:17:44.000000000 +0100
-+++ nss-3.12.6/mozilla/security/coreconf/ruleset.mk	2010-03-23 21:18:19.000000000 +0100
+ # Always set CPU_TAG on Linux, OpenVMS, WINCE.
+diff -Nur nss-3.11.orig/mozilla/security/coreconf/ruleset.mk nss-3.11/mozilla/security/coreconf/ruleset.mk
+--- nss-3.11.orig/mozilla/security/coreconf/ruleset.mk	2005-09-16 18:09:23.000000000 +0100
++++ nss-3.11/mozilla/security/coreconf/ruleset.mk	2006-01-26 15:13:55.000000000 +0000
 @@ -118,7 +118,7 @@
  
  ifdef LIBRARY_NAME
@@ -23,43 +22,19 @@ diff -aurN nss-3.12.6.orig/mozilla/security/coreconf/ruleset.mk nss-3.12.6/mozil
      endif
      ifndef SHARED_LIBRARY
  	SHARED_LIBRARY = $(OBJDIR)/$(DLL_PREFIX)$(LIBRARY_NAME)$(LIBRARY_VERSION)$(JDK_DEBUG_SUFFIX).$(DLL_SUFFIX)
-diff -aurN nss-3.12.6.orig/mozilla/security/nss/cmd/platlibs.mk nss-3.12.6/mozilla/security/nss/cmd/platlibs.mk
---- nss-3.12.6.orig/mozilla/security/nss/cmd/platlibs.mk	2010-03-23 21:17:44.000000000 +0100
-+++ nss-3.12.6/mozilla/security/nss/cmd/platlibs.mk	2010-03-23 21:18:19.000000000 +0100
-@@ -50,22 +50,6 @@
- endif
- endif
+--- nss-3.12.4/mozilla/security/nss/cmd/platlibs.mk.orig	2009-08-28 22:37:12.708606747 +0200
++++ nss-3.12.4/mozilla/security/nss/cmd/platlibs.mk	2009-08-28 22:39:19.888606747 +0200
+@@ -144,7 +128,7 @@
+ else
  
--ifeq ($(OS_ARCH), Linux)
--ifeq ($(BUILD_SUN_PKG), 1)
--ifeq ($(USE_64), 1)
--EXTRA_SHARED_LIBS += -Wl,-rpath,'$$ORIGIN/../lib64:/opt/sun/private/lib64:$$ORIGIN/../lib'
--else
--EXTRA_SHARED_LIBS += -Wl,-rpath,'$$ORIGIN/../lib:/opt/sun/private/lib'
--endif
--else
--ifeq ($(USE_64), 1)
--EXTRA_SHARED_LIBS += -Wl,-rpath,'$$ORIGIN/../lib64:$$ORIGIN/../lib'
--else
--EXTRA_SHARED_LIBS += -Wl,-rpath,'$$ORIGIN/../lib'
--endif
--endif
--endif
--
- ifeq ($(OS_ARCH), HP-UX) 
- ifeq ($(OS_TEST), ia64)
- EXTRA_SHARED_LIBS += -Wl,+b,'$$ORIGIN/../lib'
-@@ -92,7 +76,7 @@
- 
- DEFINES += -DNSS_USE_STATIC_LIBS
  # $(PROGRAM) has explicit dependencies on $(EXTRA_LIBS)
 -CRYPTOLIB=$(SOFTOKEN_LIB_DIR)/$(LIB_PREFIX)freebl.$(LIB_SUFFIX)
 +CRYPTOLIB=$(SOFTOKEN_LIB_DIR)/$(LIB_PREFIX)freebl3.$(LIB_SUFFIX)
  
  PKIXLIB = \
  	$(DIST)/lib/$(LIB_PREFIX)pkixtop.$(LIB_SUFFIX) \
-@@ -145,29 +129,29 @@
- else
+@@ -161,29 +145,29 @@
+ 	$(DIST)/lib/$(LIB_PREFIX)pkixcertsel.$(LIB_SUFFIX)
  
  EXTRA_LIBS += \
 -	$(DIST)/lib/$(LIB_PREFIX)smime.$(LIB_SUFFIX) \
@@ -99,21 +74,19 @@ diff -aurN nss-3.12.6.orig/mozilla/security/nss/cmd/platlibs.mk nss-3.12.6/mozil
  	$(DIST)/lib/$(LIB_PREFIX)certhi.$(LIB_SUFFIX) \
  	$(NULL)
  
-diff -aurN nss-3.12.6.orig/mozilla/security/nss/lib/softoken/config.mk nss-3.12.6/mozilla/security/nss/lib/softoken/config.mk
---- nss-3.12.6.orig/mozilla/security/nss/lib/softoken/config.mk	2010-03-23 21:17:44.000000000 +0100
-+++ nss-3.12.6/mozilla/security/nss/lib/softoken/config.mk	2010-03-23 21:18:19.000000000 +0100
-@@ -36,7 +36,7 @@
- # ***** END LICENSE BLOCK *****
- 
- # $(PROGRAM) has explicit dependencies on $(EXTRA_LIBS)
--CRYPTOLIB=$(DIST)/lib/$(LIB_PREFIX)freebl.$(LIB_SUFFIX)
-+CRYPTOLIB=$(DIST)/lib/$(LIB_PREFIX)freebl3.$(LIB_SUFFIX)
+--- nss-3.14/mozilla/security/nss/lib/ssl/config.mk.orig	2012-10-22 19:40:03.822256886 +0200
++++ nss-3.14/mozilla/security/nss/lib/ssl/config.mk	2012-10-22 20:42:30.725432977 +0200
+@@ -14,7 +14,7 @@
+ ifdef NSS_NO_PKCS11_BYPASS
+ DEFINES += -DNO_PKCS11_BYPASS
+ else
+-CRYPTOLIB=$(SOFTOKEN_LIB_DIR)/$(LIB_PREFIX)freebl.$(LIB_SUFFIX)
++CRYPTOLIB=$(SOFTOKEN_LIB_DIR)/$(LIB_PREFIX)freebl3.$(LIB_SUFFIX)
  
  EXTRA_LIBS += \
  	$(CRYPTOLIB) \
-diff -aurN nss-3.12.6.orig/mozilla/security/nss/lib/softoken/legacydb/config.mk nss-3.12.6/mozilla/security/nss/lib/softoken/legacydb/config.mk
---- nss-3.12.6.orig/mozilla/security/nss/lib/softoken/legacydb/config.mk	2010-03-23 21:17:44.000000000 +0100
-+++ nss-3.12.6/mozilla/security/nss/lib/softoken/legacydb/config.mk	2010-03-23 21:18:19.000000000 +0100
+--- nss-3.12.4/mozilla/security/nss/lib/softoken/legacydb/config.mk.orig	2009-06-11 02:55:49.000000000 +0200
++++ nss-3.12.4/mozilla/security/nss/lib/softoken/legacydb/config.mk	2009-08-28 22:40:40.392606747 +0200
 @@ -36,7 +36,7 @@
  # ***** END LICENSE BLOCK *****
  
@@ -123,15 +96,14 @@ diff -aurN nss-3.12.6.orig/mozilla/security/nss/lib/softoken/legacydb/config.mk 
  
  EXTRA_LIBS +=	$(CRYPTOLIB) 
  
-diff -aurN nss-3.12.6.orig/mozilla/security/nss/lib/ssl/config.mk nss-3.12.6/mozilla/security/nss/lib/ssl/config.mk
---- nss-3.12.6.orig/mozilla/security/nss/lib/ssl/config.mk	2010-03-23 21:17:44.000000000 +0100
-+++ nss-3.12.6/mozilla/security/nss/lib/ssl/config.mk	2010-03-23 21:19:35.000000000 +0100
-@@ -43,7 +43,7 @@
- DEFINES += -DNSS_SURVIVE_DOUBLE_BYPASS_FAILURE
- endif
+--- nss-3.12.4/mozilla/security/nss/lib/softoken/config.mk.orig	2009-06-11 02:55:48.000000000 +0200
++++ nss-3.12.4/mozilla/security/nss/lib/softoken/config.mk	2009-08-28 22:39:36.436608423 +0200
+@@ -36,7 +36,7 @@
+ # ***** END LICENSE BLOCK *****
  
--CRYPTOLIB=$(SOFTOKEN_LIB_DIR)/$(LIB_PREFIX)freebl.$(LIB_SUFFIX)
-+CRYPTOLIB=$(SOFTOKEN_LIB_DIR)/$(LIB_PREFIX)freebl3.$(LIB_SUFFIX)
+ # $(PROGRAM) has explicit dependencies on $(EXTRA_LIBS)
+-CRYPTOLIB=$(DIST)/lib/$(LIB_PREFIX)freebl.$(LIB_SUFFIX)
++CRYPTOLIB=$(DIST)/lib/$(LIB_PREFIX)freebl3.$(LIB_SUFFIX)
  
  EXTRA_LIBS += \
  	$(CRYPTOLIB) \
