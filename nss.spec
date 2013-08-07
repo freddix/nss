@@ -2,20 +2,20 @@
 
 Summary:	Network Security Services
 Name:		nss
-Version:	3.14.3
+Version:	3.15.1
 Release:	1
 Epoch:		1
 License:	GPL
 Group:		Libraries
 Source0:	http://ftp.mozilla.org/pub/mozilla.org/security/nss/releases/NSS_%{foover}_RTM/src/%{name}-%{version}.tar.gz
-# Source0-md5:	b326c2be8df277f62fb9c65fb3428148
+# Source0-md5:	fb68f4d210ac9397dd0d3c39c4f938eb
 Source1:	%{name}-mozilla-nss.pc
 Source2:	%{name}-config.in
 Source3:	http://www.cacert.org/certs/root.der
 # Source3-md5:	a61b375e390d9c3654eebd2031461f6b
 Patch0:		%{name}-makefile.patch
 URL:		http://www.mozilla.org/projects/security/pki/nss/
-BuildRequires:	nspr-devel >= 1:4.9
+BuildRequires:	nspr-devel >= 1:4.10
 BuildRequires:	nss-tools
 BuildRequires:	sqlite3-devel
 BuildRequires:	zlib-devel
@@ -58,10 +58,11 @@ Static NSS Toolkit libraries.
 %setup -q
 %patch0 -p1
 
-sed -i -e '/export ADDON_PATH$/a\    echo STRIP \; %{__strip} --strip-unneeded -R.comment -R.note ${5}' mozilla/security/nss/cmd/shlibsign/sign.sh
+# strip before signing
+%{__sed} -i -e '/export ADDON_PATH$/a\    echo STRIP \; %{__strip} --strip-unneeded -R.comment -R.note ${5}' nss/cmd/shlibsign/sign.sh
 
 %build
-cd mozilla/security/nss
+cd nss
 
 # http://wiki.cacert.org/wiki/NSSLib
 addbuiltin -n "CAcert Inc." -t "CT,C,C" < %{SOURCE3} >> lib/ckfw/builtins/certdata.txt
@@ -69,7 +70,7 @@ addbuiltin -n "CAcert Inc." -t "CT,C,C" < %{SOURCE3} >> lib/ckfw/builtins/certda
 %ifarch %{x8664} 
 export USE_64=1
 %endif
-%{__make} -j1 build_coreconf		\
+%{__make} -C coreconf -j1	\
 	BUILD_OPT=1			\
 	FREEBL_NO_DEPEND=1		\
 	MOZILLA_CLIENT=1		\
@@ -77,17 +78,6 @@ export USE_64=1
 	NSDISTMODE=copy			\
 	NS_USE_GCC=1			\
 	OPTIMIZER="%{rpmcflags}"	\
-	USE_PTHREADS=1
-
-%{__make} -j1 build_dbm			\
-	BUILD_OPT=1			\
-	FREEBL_NO_DEPEND=1		\
-	MOZILLA_CLIENT=1		\
-	NO_MDUPDATE=1			\
-	NSDISTMODE=copy			\
-	NS_USE_GCC=1			\
-	OPTIMIZER="%{rpmcflags}"	\
-	PLATFORM="freddix"		\
 	USE_PTHREADS=1
 
 %{__make} -j1 all			\
@@ -108,24 +98,21 @@ export USE_64=1
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT{%{_bindir},%{_includedir}/nss,/%{_lib},%{_libdir},%{_pkgconfigdir}}
 
-install mozilla/dist/private/nss/* $RPM_BUILD_ROOT%{_includedir}/nss
-install mozilla/dist/public/dbm/*  $RPM_BUILD_ROOT%{_includedir}/nss
-install mozilla/dist/public/nss/*  $RPM_BUILD_ROOT%{_includedir}/nss
-install mozilla/dist/freddix/bin/*  $RPM_BUILD_ROOT%{_bindir}
-install mozilla/dist/freddix/lib/*  $RPM_BUILD_ROOT%{_libdir}
+install dist/private/nss/* $RPM_BUILD_ROOT%{_includedir}/nss
+install dist/public/dbm/* $RPM_BUILD_ROOT%{_includedir}/nss
+install dist/public/nss/* $RPM_BUILD_ROOT%{_includedir}/nss
+install dist/freddix/bin/* $RPM_BUILD_ROOT%{_bindir}
+install dist/freddix/lib/* $RPM_BUILD_ROOT%{_libdir}
 
-sed -e '
+%{__sed} -e '
 	s#libdir=.*#libdir=%{_libdir}#g
 	s#includedir=.*#includedir=%{_includedir}#g
 	s#VERSION#%{version}#g
-' %{SOURCE1} > $RPM_BUILD_ROOT%{_pkgconfigdir}/mozilla-nss.pc
+' %{SOURCE1} > $RPM_BUILD_ROOT%{_pkgconfigdir}/nss.pc
 
-ln -s mozilla-nss.pc $RPM_BUILD_ROOT%{_pkgconfigdir}/nss.pc
-
-NSS_VMAJOR=$(awk '/#define.*NSS_VMAJOR/ {print $3}' mozilla/security/nss/lib/nss/nss.h)
-NSS_VMINOR=$(awk '/#define.*NSS_VMINOR/ {print $3}' mozilla/security/nss/lib/nss/nss.h)
-NSS_VPATCH=$(awk '/#define.*NSS_VPATCH/ {print $3}' mozilla/security/nss/lib/nss/nss.h)
-
+NSS_VMAJOR=$(awk '/#define.*NSS_VMAJOR/ {print $3}' nss/lib/nss/nss.h)
+NSS_VMINOR=$(awk '/#define.*NSS_VMINOR/ {print $3}' nss/lib/nss/nss.h)
+NSS_VPATCH=$(awk '/#define.*NSS_VPATCH/ {print $3}' nss/lib/nss/nss.h)
 %{__sed} -e "
 	s,@libdir@,%{_libdir},g
 	s,@prefix@,%{_prefix},g
@@ -148,7 +135,6 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libfreebl3.so
-%attr(755,root,root) %{_libdir}/libfreebl3.so
 %attr(755,root,root) %{_libdir}/libnss3.so
 %attr(755,root,root) %{_libdir}/libnssckbi.so
 %attr(755,root,root) %{_libdir}/libnssdbm3.so
@@ -156,17 +142,15 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/libsmime3.so
 %attr(755,root,root) %{_libdir}/libsoftokn3.so
 %attr(755,root,root) %{_libdir}/libssl3.so
-%{_libdir}/libfreebl3.chk
-%{_libdir}/libfreebl3.chk
 %{_libdir}/libnssdbm3.chk
 %{_libdir}/libsoftokn3.chk
+%{_libdir}/libfreebl3.chk
 
 %files devel
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/nss-config
 %{_includedir}/nss
 %{_libdir}/libcrmf.a
-%{_pkgconfigdir}/mozilla-nss.pc
 %{_pkgconfigdir}/nss.pc
 
 %files static

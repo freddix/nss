@@ -1,5 +1,5 @@
---- nss-3.11.1/mozilla/security/coreconf/Linux.mk.orig	2006-04-25 03:32:16.000000000 +0200
-+++ nss-3.11.1/mozilla/security/coreconf/Linux.mk	2006-05-27 21:07:22.101515500 +0200
+--- nss-3.15/nss/coreconf/Linux.mk.orig	2006-04-25 03:32:16.000000000 +0200
++++ nss-3.15/nss/coreconf/Linux.mk	2006-05-27 21:07:22.101515500 +0200
 @@ -169,8 +169,8 @@
  DSO_LDFLAGS		=
  LDFLAGS			+= $(ARCHFLAG)
@@ -10,9 +10,8 @@
  
  #
  # Always set CPU_TAG on Linux, OpenVMS, WINCE.
-diff -Nur nss-3.11.orig/mozilla/security/coreconf/ruleset.mk nss-3.11/mozilla/security/coreconf/ruleset.mk
---- nss-3.11.orig/mozilla/security/coreconf/ruleset.mk	2005-09-16 18:09:23.000000000 +0100
-+++ nss-3.11/mozilla/security/coreconf/ruleset.mk	2006-01-26 15:13:55.000000000 +0000
+--- nss-3.15/nss/coreconf/ruleset.mk.orig	2005-09-16 18:09:23.000000000 +0100
++++ nss-3.15/nss/coreconf/ruleset.mk	2006-01-26 15:13:55.000000000 +0000
 @@ -118,7 +118,7 @@
  
  ifdef LIBRARY_NAME
@@ -22,19 +21,27 @@ diff -Nur nss-3.11.orig/mozilla/security/coreconf/ruleset.mk nss-3.11/mozilla/se
      endif
      ifndef SHARED_LIBRARY
  	SHARED_LIBRARY = $(OBJDIR)/$(DLL_PREFIX)$(LIBRARY_NAME)$(LIBRARY_VERSION)$(JDK_DEBUG_SUFFIX).$(DLL_SUFFIX)
---- nss-3.12.4/mozilla/security/nss/cmd/platlibs.mk.orig	2009-08-28 22:37:12.708606747 +0200
-+++ nss-3.12.4/mozilla/security/nss/cmd/platlibs.mk	2009-08-28 22:39:19.888606747 +0200
-@@ -144,7 +128,7 @@
- else
- 
+--- nss-3.15/nss/cmd/platlibs.mk.orig	2013-06-08 07:11:01.663565564 +0200
++++ nss-3.15/nss/cmd/platlibs.mk	2013-06-08 07:15:25.283560068 +0200
+@@ -37,13 +37,13 @@
+ DEFINES += -DNSS_USE_STATIC_LIBS
  # $(PROGRAM) has explicit dependencies on $(EXTRA_LIBS)
--CRYPTOLIB=$(SOFTOKEN_LIB_DIR)/$(LIB_PREFIX)freebl.$(LIB_SUFFIX)
-+CRYPTOLIB=$(SOFTOKEN_LIB_DIR)/$(LIB_PREFIX)freebl3.$(LIB_SUFFIX)
- 
- PKIXLIB = \
- 	$(DIST)/lib/$(LIB_PREFIX)pkixtop.$(LIB_SUFFIX) \
-@@ -161,29 +145,29 @@
- 	$(DIST)/lib/$(LIB_PREFIX)pkixcertsel.$(LIB_SUFFIX)
+ ifndef NSS_USE_SYSTEM_FREEBL
+-CRYPTOLIB=$(DIST)/lib/$(LIB_PREFIX)freebl.$(LIB_SUFFIX)
+-SOFTOKENLIB=$(DIST)/lib/$(LIB_PREFIX)softokn.$(LIB_SUFFIX)
++CRYPTOLIB=$(DIST)/lib/$(LIB_PREFIX)freebl3.$(LIB_SUFFIX)
++SOFTOKENLIB=$(DIST)/lib/$(LIB_PREFIX)softokn3.$(LIB_SUFFIX)
+ else
+ # Use the system installed freebl static library and set softoken one to empty.
+ # Some tools need to link statically with freebl but none with softoken. Only
+ # the softoken shared library, not the static one, is installed in the system.
+-CRYPTOLIB=$(FREEBL_LIB_DIR)/$(LIB_PREFIX)freebl.$(LIB_SUFFIX)
++CRYPTOLIB=$(FREEBL_LIB_DIR)/$(LIB_PREFIX)freebl3.$(LIB_SUFFIX)
+ SOFTOKENLIB=
+ EXTRA_SHARED_LIBS += \
+ 	-L$(SOFTOKEN_LIB_DIR) \
+@@ -102,29 +102,29 @@
+ else
  
  EXTRA_LIBS += \
 -	$(DIST)/lib/$(LIB_PREFIX)smime.$(LIB_SUFFIX) \
@@ -55,10 +62,9 @@ diff -Nur nss-3.11.orig/mozilla/security/coreconf/ruleset.mk nss-3.11/mozilla/se
  	$(DIST)/lib/$(LIB_PREFIX)certhi.$(LIB_SUFFIX) \
 -	$(DIST)/lib/$(LIB_PREFIX)nsspki.$(LIB_SUFFIX) \
 -	$(DIST)/lib/$(LIB_PREFIX)pk11wrap.$(LIB_SUFFIX) \
--	$(DIST)/lib/$(LIB_PREFIX)softokn.$(LIB_SUFFIX) \
 +	$(DIST)/lib/$(LIB_PREFIX)nsspki3.$(LIB_SUFFIX) \
 +	$(DIST)/lib/$(LIB_PREFIX)pk11wrap3.$(LIB_SUFFIX) \
-+	$(DIST)/lib/$(LIB_PREFIX)softokn3.$(LIB_SUFFIX) \
+ 	$(SOFTOKENLIB) \
  	$(DIST)/lib/$(LIB_PREFIX)certdb.$(LIB_SUFFIX) \
 -	$(DIST)/lib/$(LIB_PREFIX)nsspki.$(LIB_SUFFIX) \
 +	$(DIST)/lib/$(LIB_PREFIX)nsspki3.$(LIB_SUFFIX) \
@@ -74,8 +80,8 @@ diff -Nur nss-3.11.orig/mozilla/security/coreconf/ruleset.mk nss-3.11/mozilla/se
  	$(DIST)/lib/$(LIB_PREFIX)certhi.$(LIB_SUFFIX) \
  	$(NULL)
  
---- nss-3.14/mozilla/security/nss/lib/ssl/config.mk.orig	2012-10-22 19:40:03.822256886 +0200
-+++ nss-3.14/mozilla/security/nss/lib/ssl/config.mk	2012-10-22 20:42:30.725432977 +0200
+--- nss-3.15/nss/lib/ssl/config.mk.orig	2012-10-22 19:40:03.822256886 +0200
++++ nss-3.15/nss/lib/ssl/config.mk	2012-10-22 20:42:30.725432977 +0200
 @@ -14,7 +14,7 @@
  ifdef NSS_NO_PKCS11_BYPASS
  DEFINES += -DNO_PKCS11_BYPASS
@@ -85,8 +91,8 @@ diff -Nur nss-3.11.orig/mozilla/security/coreconf/ruleset.mk nss-3.11/mozilla/se
  
  EXTRA_LIBS += \
  	$(CRYPTOLIB) \
---- nss-3.12.4/mozilla/security/nss/lib/softoken/legacydb/config.mk.orig	2009-06-11 02:55:49.000000000 +0200
-+++ nss-3.12.4/mozilla/security/nss/lib/softoken/legacydb/config.mk	2009-08-28 22:40:40.392606747 +0200
+--- nss-3.15/nss/lib/softoken/legacydb/config.mk.orig	2009-06-11 02:55:49.000000000 +0200
++++ nss-3.15/nss/lib/softoken/legacydb/config.mk	2009-08-28 22:40:40.392606747 +0200
 @@ -36,7 +36,7 @@
  # ***** END LICENSE BLOCK *****
  
@@ -96,8 +102,8 @@ diff -Nur nss-3.11.orig/mozilla/security/coreconf/ruleset.mk nss-3.11/mozilla/se
  
  EXTRA_LIBS +=	$(CRYPTOLIB) 
  
---- nss-3.12.4/mozilla/security/nss/lib/softoken/config.mk.orig	2009-06-11 02:55:48.000000000 +0200
-+++ nss-3.12.4/mozilla/security/nss/lib/softoken/config.mk	2009-08-28 22:39:36.436608423 +0200
+--- nss-3.15/nss/lib/softoken/config.mk.orig	2009-06-11 02:55:48.000000000 +0200
++++ nss-3.15/nss/lib/softoken/config.mk	2009-08-28 22:39:36.436608423 +0200
 @@ -36,7 +36,7 @@
  # ***** END LICENSE BLOCK *****
  
