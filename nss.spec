@@ -1,21 +1,22 @@
-%define		foover	%(echo %{version} | tr . _)
+%define		foover		%(echo %{version} | tr . _)
+%define		nspr_req	4.10
 
 Summary:	Network Security Services
 Name:		nss
 Version:	3.15.1
-Release:	1
+Release:	2
 Epoch:		1
 License:	GPL
 Group:		Libraries
 Source0:	http://ftp.mozilla.org/pub/mozilla.org/security/nss/releases/NSS_%{foover}_RTM/src/%{name}-%{version}.tar.gz
 # Source0-md5:	fb68f4d210ac9397dd0d3c39c4f938eb
-Source1:	%{name}-mozilla-nss.pc
+Source1:	%{name}.pc.in
 Source2:	%{name}-config.in
 Source3:	http://www.cacert.org/certs/root.der
 # Source3-md5:	a61b375e390d9c3654eebd2031461f6b
 Patch0:		%{name}-makefile.patch
 URL:		http://www.mozilla.org/projects/security/pki/nss/
-BuildRequires:	nspr-devel >= 1:4.10
+BuildRequires:	nspr-devel >= 1:%{nspr_req}
 BuildRequires:	nss-tools
 BuildRequires:	sqlite3-devel
 BuildRequires:	zlib-devel
@@ -70,46 +71,44 @@ addbuiltin -n "CAcert Inc." -t "CT,C,C" < %{SOURCE3} >> lib/ckfw/builtins/certda
 %ifarch %{x8664} 
 export USE_64=1
 %endif
-%{__make} -C coreconf -j1	\
-	BUILD_OPT=1			\
-	FREEBL_NO_DEPEND=1		\
-	MOZILLA_CLIENT=1		\
-	NO_MDUPDATE=1			\
-	NSDISTMODE=copy			\
-	NS_USE_GCC=1			\
-	OPTIMIZER="%{rpmcflags}"	\
-	USE_PTHREADS=1
+export BUILD_OPT=1
+export FREEBL_NO_DEPEND=1
+export LOWHASH_EXPORTS=nsslowhash.h
+export MOZILLA_CLIENT=1
+export NO_MDUPDATE=1
+export NSDISTMODE=copy
+export NSS_USE_SYSTEM_SQLITE=1
+export NS_USE_GCC=1
+export USE_PTHREADS=1
+export USE_SYSTEM_ZLIB=1
+export XCFLAGS="%{rpmcflags}"
+export ZLIB_LIBS="-lz"
 
-%{__make} -j1 all			\
-	BUILD_OPT=1			\
-	FREEBL_NO_DEPEND=1		\
-	LOWHASH_EXPORTS=nsslowhash.h	\
-	MOZILLA_CLIENT=1		\
-	NO_MDUPDATE=1			\
-	NSDISTMODE=copy			\
-	NS_USE_GCC=1			\
-	OPTIMIZER="%{rpmcflags}"	\
-	PLATFORM="freddix"		\
-	USE_PTHREADS=1			\
-	USE_SYSTEM_ZLIB=1		\
-	ZLIB_LIBS="-lz"
+%{__make} -C coreconf -j1
+%{__make} -j1 all
 
 %install
 rm -rf $RPM_BUILD_ROOT
-install -d $RPM_BUILD_ROOT{%{_bindir},%{_includedir}/nss,/%{_lib},%{_libdir},%{_pkgconfigdir}}
+install -d $RPM_BUILD_ROOT{%{_bindir},%{_includedir}/nss,%{_libdir},%{_pkgconfigdir}}
 
 install dist/private/nss/* $RPM_BUILD_ROOT%{_includedir}/nss
 install dist/public/dbm/* $RPM_BUILD_ROOT%{_includedir}/nss
 install dist/public/nss/* $RPM_BUILD_ROOT%{_includedir}/nss
-install dist/freddix/bin/* $RPM_BUILD_ROOT%{_bindir}
-install dist/freddix/lib/* $RPM_BUILD_ROOT%{_libdir}
+install dist/*.OBJ/bin/* $RPM_BUILD_ROOT%{_bindir}
+install dist/*.OBJ/lib/* $RPM_BUILD_ROOT%{_libdir}
 
-%{__sed} -e '
-	s#libdir=.*#libdir=%{_libdir}#g
-	s#includedir=.*#includedir=%{_includedir}#g
-	s#VERSION#%{version}#g
-' %{SOURCE1} > $RPM_BUILD_ROOT%{_pkgconfigdir}/nss.pc
+# instal pc file
+%{__sed} -e "
+	s,%prefix%,%{_prefix},g
+	s,%exec_prefix%,%{_bindir},g
+	s,%libdir%,%{_libdir},g
+	s,%includedir%,%{_includedir}/nss,g
+	s,%NSS_VERSION%,%{version},g
+	s,%NSPR_VERSION%,%{nspr_req},g
+	s,%nspr_includedir%,`pkg-config --cflags nspr`,g
+" %{SOURCE1} > $RPM_BUILD_ROOT%{_pkgconfigdir}/nss.pc
 
+# isntall nss-config file
 NSS_VMAJOR=$(awk '/#define.*NSS_VMAJOR/ {print $3}' nss/lib/nss/nss.h)
 NSS_VMINOR=$(awk '/#define.*NSS_VMINOR/ {print $3}' nss/lib/nss/nss.h)
 NSS_VPATCH=$(awk '/#define.*NSS_VPATCH/ {print $3}' nss/lib/nss/nss.h)
