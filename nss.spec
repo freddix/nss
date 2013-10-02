@@ -1,15 +1,15 @@
 %define		foover		%(echo %{version} | tr . _)
-%define		nspr_req	4.10
+%define		nspr_req	4.10.1
 
 Summary:	Network Security Services
 Name:		nss
-Version:	3.15.1
-Release:	2
+Version:	3.15.2
+Release:	1
 Epoch:		1
 License:	GPL
 Group:		Libraries
 Source0:	http://ftp.mozilla.org/pub/mozilla.org/security/nss/releases/NSS_%{foover}_RTM/src/%{name}-%{version}.tar.gz
-# Source0-md5:	fb68f4d210ac9397dd0d3c39c4f938eb
+# Source0-md5:	154223568f9734c76c164b46c774450c
 Source1:	%{name}.pc.in
 Source2:	%{name}-config.in
 Source3:	http://www.cacert.org/certs/root.der
