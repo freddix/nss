@@ -1,17 +1,17 @@
 # based on PLD Linux spec git://git.pld-linux.org/packages/.git
 
 %define		foover		%(echo %{version} | tr . _)
-%define		nspr_req	4.10.7
+%define		nspr_req	4.10.8
 
 Summary:	Network Security Services
 Name:		nss
-Version:	3.17.3
+Version:	3.17.4
 Release:	1
 Epoch:		1
 License:	GPL
 Group:		Libraries
 Source0:	http://ftp.mozilla.org/pub/mozilla.org/security/nss/releases/NSS_%{foover}_RTM/src/%{name}-%{version}.tar.gz
-# Source0-md5:	fba7489e1b26f2a0bfe5527430fd61e1
+# Source0-md5:	a77df26072cabf8afb26911b6fa9b755
 Source1:	%{name}.pc.in
 Source2:	%{name}-config.in
 Source3:	http://www.cacert.org/certs/root.der
